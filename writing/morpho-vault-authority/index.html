@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta
+    name="description"
+    content="How authority and risk controls are structured in a curated lending vault."
+  >
+
+  <title>The Architecture of Onchain Credit</title>
+
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body>
+
+  <header class="site-header">
+    <div class="container">
+      <a href="../../index.html" class="site-title">P</a>
+
+      <nav aria-label="Main navigation">
+        <ul class="nav-list">
+          <li><a href="../../index.html#writing">Writing</a></li>
+          <li><a href="../../index.html#projects">Projects</a></li>
+          <li><a href="../../index.html#notes">Notes</a></li>
+          <li><a href="../../index.html#about">About</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+
+  <main>
+    <article class="article">
+
+      <header class="article-header container">
+        <h1>The Architecture of Onchain Credit</h1>
+
+        <p class="article-subtitle">
+          <em>How authority and risk controls are structured in a curated lending vault</em>
+        </p>
+
+        <figure class="article-hero">
+          <img
+            src="images/hero.jpg"
+            alt="Abstract orange and white light trails on a dark background"
+          >
+
+          <!--
+          Add the photographer credit when you have the final link.
+
+          Example:
+
+          <figcaption>
+            Photo by
+            <a href="PHOTOGRAPHER-LINK" target="_blank" rel="noopener noreferrer">
+              Photographer name
+            </a>
+            on
+            <a href="IMAGE-SOURCE-LINK" target="_blank" rel="noopener noreferrer">
+              Unsplash
+            </a>
+          </figcaption>
+          -->
+        </figure>
+      </header>
+
+
+      <div class="article-body container">
+
+        <p>
+          I wanted to understand how secured lending changes when it moves onchain:
+        </p>
+
+        <ul>
+          <li>which functions are separated</li>
+          <li>where authority sits</li>
+          <li>how much discretion remains with human actors</li>
+          <li>what participants still have to trust</li>
+        </ul>
+
+        <p>
+          <a
+            href="https://app.morpho.org/vaults"
+            target="_blank"
+            rel="noopener noreferrer"
+          >Morpho</a>
+          offered a useful case study because its vault architecture makes those divisions explicit.
+        </p>
+
+        <p>
+          To make that structure concrete, I used the
+          <strong>
+            <a
+              href="https://app.morpho.org/base/vault/0xbeef0e0834849aCC03f0089F01f4F1Eeb06873C9/steakhouse-prime-usdc#overview"
+              target="_blank"
+              rel="noopener noreferrer"
+            >Steakhouse Prime USDC</a>
+          </strong>
+          vault as a case study.
+        </p>
+
+        <p>
+          Rather than looking only at where the capital was allocated, I examined the roles around that allocation: who could make which decisions, how much discretion each role retained, and what constraints shaped that authority.
+        </p>
+
+        <p>
+          In a curated vault, authority is neither fully automated nor fully discretionary. It is structured.
+        </p>
+
+
+        <section>
+          <h2>Roles, Participants and Infrastructure</h2>
+
+          <p>
+            The vault sits within a broader structure of roles, participants and infrastructure, each carrying different responsibilities and dependencies.
+          </p>
+
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Layer</th>
+                  <th scope="col">Components</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                <tr>
+                  <td>Vault governance and management</td>
+                  <td>Owner, Curator, Allocator, Sentinel</td>
+                </tr>
+                <tr>
+                  <td>Capital participants</td>
+                  <td>Depositors, Borrowers</td>
+                </tr>
+                <tr>
+                  <td>Protocol and market infrastructure</td>
+                  <td>Morpho protocol, oracles, liquidators</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p>
+            Of these three layers, the governance roles hold the most direct authority over how the vault is configured and managed.
+          </p>
+
+
+          <h3>Owner</h3>
+
+          <ul>
+            <li><strong>Function:</strong> administers the vault’s governance structure</li>
+            <li><strong>Decision rights:</strong> appoints or replaces key privileged roles</li>
+            <li><strong>Discretion:</strong> decides who is entrusted with those powers</li>
+            <li><strong>Trust dependency:</strong> governance judgment and secure control of the Owner authority</li>
+            <li><strong>Main risk:</strong> compromised or irresponsible reassignment of privileged roles</li>
+          </ul>
+
+          <p>
+            The Owner is not the investment strategist or day-to-day risk manager. Its role sits one level above that: it shapes the authority structure around the vault. In practice, that means deciding who is trusted to act as Curator or Sentinel and maintaining secure control over the highest-level administrative permissions.
+          </p>
+
+          <p>
+            That distinction matters because this is not quite analogous to a conventional fund manager. In a protocol-based structure, some responsibilities that might otherwise sit inside one institution are separated into explicit roles with bounded permissions. The Owner’s responsibility is therefore less about making investment decisions directly and more about <strong>delegating authority responsibly</strong>.
+          </p>
+
+
+          <h3>Curator</h3>
+
+          <ul>
+            <li><strong>Function:</strong> defines the vault’s strategy and risk boundaries</li>
+            <li><strong>Decision rights:</strong> determines which exposures are permitted, configures risk limits, and appoints Allocators</li>
+            <li><strong>Discretion:</strong> decides how the vault’s risk appetite is translated into concrete constraints within the protocol’s available controls</li>
+            <li><strong>Trust dependency:</strong> quality of risk judgment, monitoring, and delegation</li>
+            <li><strong>Main risk:</strong> poor or compromised curation can materially change the vault’s risk profile</li>
+          </ul>
+
+          <p>
+            The Curator sits between the protocol’s fixed capabilities and the vault’s actual risk configuration. Morpho defines the actions and controls that are available; the Curator decides how those controls are used to express a particular risk view. Its role is therefore less about day-to-day capital movement and more about determining the boundaries within which that movement can occur.
+          </p>
+
+          <p>
+            Vault V2 separates this strategic risk-setting function from tactical allocation. The Curator appoints one or more Allocators, who can then move capital within the limits already established for the vault. This creates a clear distinction between <strong>deciding which risks are acceptable</strong> and <strong>deciding how capital is deployed among those accepted risks</strong>.
+          </p>
+
+          <p>
+            That separation also changes where trust sits. A depositor does not need to rely on the Curator to make every allocation decision, but does rely on the Curator to define sensible risk boundaries, monitor whether those assumptions remain valid, and delegate allocation authority appropriately.
+          </p>
+
+          <p>
+            The protocol makes the Curator’s permissions and resulting configuration visible onchain, but not necessarily the full reasoning behind those choices. That judgment may be shaped by an offchain investment mandate, risk framework, internal governance process, or client requirements. The technical question, then, is how those judgments are translated into enforceable vault configuration.
+          </p>
+
+
+          <h3>Allocator</h3>
+
+          <ul>
+            <li><strong>Function:</strong> manages the deployment of capital within the vault’s established risk limits</li>
+            <li><strong>Decision rights:</strong> allocates and reallocates capital among permitted positions</li>
+            <li><strong>Discretion:</strong> determines how capital is distributed within boundaries set by the Curator</li>
+            <li><strong>Trust dependency:</strong> quality and responsiveness of allocation decisions</li>
+            <li><strong>Main risk:</strong> poor allocation decisions can affect liquidity, utilization and realised exposure even without changing the vault’s permitted risk limits</li>
+          </ul>
+
+          <p>
+            The Allocator operates within the boundaries established by the Curator. It cannot independently widen those boundaries, but retains discretion over how capital is deployed among the exposures already permitted. This separates <strong>setting the vault’s risk limits</strong> from <strong>managing capital within those limits</strong>.
+          </p>
+
+
+          <h3>Sentinel</h3>
+
+          <ul>
+            <li><strong>Function:</strong> provides a defensive intervention role</li>
+            <li><strong>Decision rights:</strong> can take specified actions that reduce or interrupt risk</li>
+            <li><strong>Discretion:</strong> decides when defensive intervention is warranted within its permitted powers</li>
+            <li><strong>Trust dependency:</strong> judgment and responsiveness under changing or adverse conditions</li>
+            <li><strong>Main risk:</strong> failure to intervene when intervention is warranted</li>
+          </ul>
+
+          <p>
+            The Sentinel’s authority is deliberately one-directional. It can take actions that reduce exposure or interrupt pending changes, but cannot use those powers to expand the vault’s risk boundaries. Its role therefore adds a separate defensive layer without transferring broader strategy-setting authority away from the Curator.
+          </p>
+        </section>
+
+
+        <section>
+          <h2>How Risk Judgment Becomes Configuration</h2>
+
+          <h3>Encoding Exposure: Adapters, IDs and Caps</h3>
+
+          <p>
+            Morpho Vault V2 gives the Curator a relatively small set of controls for translating a risk view into enforceable constraints.
+          </p>
+
+          <ul>
+            <li>Adapters determine which kinds of underlying markets the vault can access</li>
+            <li>IDs classify exposure at different levels</li>
+            <li>caps limit the amount of capital that can be allocated to those exposures</li>
+          </ul>
+
+          <p>
+            In the Steakhouse Prime USDC vault, one Morpho market adapter is enabled. That adapter connects the vault to multiple Morpho variable-rate markets. To see how this works in practice, I traced one USDC/cbETH market through the adapter.
+          </p>
+
+          <p>
+            The market itself is defined by five parameters: loan token, collateral token, oracle, interest-rate model and LLTV. From those parameters, the adapter derives three risk identifiers: one for the adapter as a whole, one for the collateral, and one for the exact market configuration.
+          </p>
+
+          <p>
+            For this USDC/cbETH market, the same exposure could therefore be constrained at several levels. Steakhouse had configured an absolute cap of 220M USDC at the cbETH collateral level and 20M USDC for the exact USDC/cbETH market. The broader adapter-level limits were much looser, while the relative caps were set at 100%.
+          </p>
+
+          <p>
+            In practice, the 20M USDC market-level cap was the limit that constrained this allocation.
+          </p>
+
+          <figure class="article-figure">
+            <img
+              src="images/risk-config-diagram.png"
+              alt="Diagram showing how one Morpho market exposure is constrained at adapter, collateral, and exact-market levels"
+            >
+
+            <figcaption>
+              One market exposure can be constrained at the adapter, collateral and exact-market levels.
+            </figcaption>
+          </figure>
+
+          <p>
+            What becomes clear is how granular the configuration can be. These overlapping layers give the Curator several ways to translate a risk view into enforceable limits rather than relying on a single market-level constraint.
+          </p>
+        </section>
+
+
+        <section>
+          <h2>Controls Over Risk Configuration</h2>
+
+          <p>
+            Exposure limits are only one layer of the configuration. A separate set of controls governs how those limits can be changed, while other controls shape liquidity, access and defensive intervention.
+          </p>
+
+          <p>
+            The controls below show how changes to permitted exposure are handled in practice — who can act, whether the change expands or reduces risk, and how quickly it can take effect.
+          </p>
+
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Control</th>
+                  <th scope="col">Purpose</th>
+                  <th scope="col">Who can act</th>
+                  <th scope="col">Timing</th>
+                  <th scope="col">Direction</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                <tr>
+                  <td>Increase cap</td>
+                  <td>Expand permitted exposure</td>
+                  <td>Curator</td>
+                  <td>3-day timelock</td>
+                  <td>Expands risk</td>
+                </tr>
+                <tr>
+                  <td>Decrease cap</td>
+                  <td>Reduce permitted exposure</td>
+                  <td>Curator / Sentinel</td>
+                  <td>Immediate</td>
+                  <td>Reduces risk</td>
+                </tr>
+                <tr>
+                  <td>Revoke pending action</td>
+                  <td>Stop queued change</td>
+                  <td>Sentinel</td>
+                  <td>Immediate</td>
+                  <td>Defensive</td>
+                </tr>
+                <tr>
+                  <td>Deallocate assets</td>
+                  <td>Reduce deployed exposure</td>
+                  <td>Sentinel / permitted role</td>
+                  <td>Immediate</td>
+                  <td>Defensive</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p>
+            The table shows an asymmetric control structure: the Curator can expand permitted exposure, but only after a delay, while risk-reducing actions can take effect immediately.
+          </p>
+
+          <p>
+            The Sentinel serves as a defensive role within this structure. It cannot expand the vault’s risk envelope, but it can reduce caps, revoke pending increases, or deallocate assets from active positions. The Allocator can also deallocate, but its broader role is to manage capital within the limits already established by the Curator.
+          </p>
+
+          <p><strong>Other operational controls</strong></p>
+
+          <ul>
+            <li>Liquidity adapter — designated path for sourcing withdrawal liquidity</li>
+            <li>Force deallocation — permissionless fallback, with a 0.01% penalty</li>
+            <li>Gate hooks — optional access controls, currently unset</li>
+          </ul>
+
+          <p>
+            Liquidity management is also separated from the broader exposure limits. The vault uses the same Morpho market adapter as its designated liquidity adapter, with liquidity data pointing to a USDC/cbBTC market with an 86% LLTV. This creates an explicit path for sourcing liquidity when assets need to be returned, rather than treating every allocation as equally available for withdrawals.
+          </p>
+
+          <p>
+            A permissionless force-deallocation path provides an additional fallback, with a 0.01% penalty configured for the adapter. By contrast, the four optional gate hooks are unset in this vault, meaning that the available access-control points for sending and receiving assets or shares are not currently being used.
+          </p>
+
+          <p>
+            Taken together, these controls add another dimension to the vault’s risk structure. The vault does not only specify <strong>which risks may be taken and in what amount</strong>; it also constrains <strong>how those limits can be changed, how quickly risk can be expanded or reduced, and which actors can intervene when conditions change</strong>.
+          </p>
+        </section>
+
+
+        <section>
+          <h2>How Authority Gets Redistributed Onchain</h2>
+
+          <p>
+            In a curated lending vault, the structure of risk management becomes more visible. Roles, permissions and limits that might otherwise sit inside an institution are surfaced as explicit configuration, giving the protocol enough granularity to shape exposure at several levels.
+          </p>
+
+          <p>
+            The trade-off is that greater visibility does not necessarily make the system easier to understand. The more granular the control surface becomes, the more an observer has to understand how a risk view has been translated into adapters, caps, permissions, timelocks and other protocol constraints.
+          </p>
+
+          <p>
+            Depositors therefore depend not only on the judgement of the Curator, the execution of the Allocator and the responsiveness of the Sentinel, but also on the infrastructure beneath those decisions: the protocol, oracles, collateral markets, liquidity and liquidation mechanisms.
+          </p>
+
+          <p>
+            <strong>What becomes visible onchain is not necessarily the reasoning behind every decision, but the structure within which those decisions can operate.</strong>
+          </p>
+        </section>
+
+
+        <section class="sources">
+          <h2>Sources</h2>
+
+          <ul>
+            <li>
+              <strong>Morpho — </strong>
+              <a
+                href="https://docs.morpho.org/developers/contracts/morpho-vaults-v2/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >Vault V2 contract documentation</a>
+            </li>
+
+            <li>
+              <strong>Steakhouse Prime USDC — </strong>
+              <a
+                href="https://app.morpho.org/base/vault/0xbeef0e0834849aCC03f0089F01f4F1Eeb06873C9/steakhouse-prime-usdc#overview"
+                target="_blank"
+                rel="noopener noreferrer"
+              >Morpho vault page</a>
+            </li>
+
+            <li>
+              <strong>Steakhouse Prime USDC vault — </strong>
+              <a
+                href="https://basescan.org/address/0xbeef0e0834849aCC03f0089F01f4F1Eeb06873C9#readContract"
+                target="_blank"
+                rel="noopener noreferrer"
+              >BaseScan contract</a>
+            </li>
+
+            <li>
+              <strong>Steakhouse Morpho market adapter — </strong>
+              <a
+                href="https://basescan.org/address/0xfDd31Cdf6712c47A4e67037D9F2E35587f5404C0#readContract"
+                target="_blank"
+                rel="noopener noreferrer"
+              >BaseScan contract</a>
+            </li>
+          </ul>
+        </section>
+
+      </div>
+    </article>
+  </main>
+
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>© 2026 P</p>
+    </div>
+  </footer>
+
+</body>
+</html>
