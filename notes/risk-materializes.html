@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta
+    name="description"
+    content="Notes on what happens when risk judgments in Morpho curated vaults prove incorrect."
+  >
+
+  <title>Morpho Curated Vaults: When Risk Materializes</title>
+
+  <link rel="stylesheet" href="../styles.css">
+</head>
+
+<body>
+
+  <header class="site-header">
+    <div class="container">
+
+      <a href="../index.html" class="site-title">
+        P
+      </a>
+
+      <nav aria-label="Main navigation">
+        <ul class="nav-list">
+          <li>
+            <a href="../index.html#writing">Writing</a>
+          </li>
+
+          <li>
+            <a href="../index.html#projects">Projects</a>
+          </li>
+
+          <li>
+            <a href="../index.html#notes">Notes</a>
+          </li>
+
+          <li>
+            <a href="../index.html#about">About</a>
+          </li>
+        </ul>
+      </nav>
+
+    </div>
+  </header>
+
+
+  <main>
+
+    <article class="article">
+
+      <header class="article-header container">
+
+        <p class="content-meta">
+          Note
+        </p>
+
+        <h1>
+          Morpho Curated Vaults: When Risk Materializes
+        </h1>
+
+      </header>
+
+
+      <div class="article-body container">
+
+        <p>
+          My curiosity is about what happens when perceived risk becomes reality,
+          particularly where human judgment and protocol mechanisms meet.
+        </p>
+
+        <p>
+          I first looked at the basic role structure of a Morpho curated vault:
+          the depositor, curator, allocator, sentinel, and the underlying Morpho
+          markets. That helped me understand the different roles, their authority,
+          and <strong>where decision-making power sits.</strong>
+        </p>
+
+        <p>
+          My current question is what happens when those risk judgments prove incorrect.
+        </p>
+
+        <p>
+          A depositor supplies assets to a vault but does not directly choose every
+          underlying market that receives the capital. The decision about where that
+          capital goes is delegated. The curator defines much of the vault’s risk
+          framework, while the allocator determines how capital is distributed across
+          approved markets within those constraints. Other roles, such as the sentinel,
+          have narrower powers designed to respond to particular risk conditions.
+        </p>
+
+        <p>
+          Although the underlying Morpho markets are permissionless lending markets,
+          a curated vault therefore introduces another layer of judgment between the
+          depositor and those markets. The depositor is exposed not only to risks
+          associated with borrowers, collateral, liquidity, interest rates, and
+          liquidation mechanics, but also to the
+          <strong>quality of the vault’s risk decisions.</strong>
+        </p>
+
+        <p>
+          That raises several questions I do not yet have complete answers to.
+        </p>
+
+        <p>
+          One is how changes to risk parameters propagate through the vault. If a
+          curator changes a market cap, removes a market, or changes the vault’s
+          permitted exposure, how quickly does that affect where depositor capital
+          is actually allocated?
+        </p>
+
+        <p>
+          A second question concerns stress conditions. I understand the basic role
+          of liquidation at the underlying market level, but I still want to understand
+          how those mechanisms behave during severe market movements and how liquidity
+          conditions affect the outcome.
+        </p>
+
+        <p>
+          The question I am most interested in is what happens when the curator or
+          allocator misjudges the risk. A vault might, for example, allocate too much
+          capital to a market whose collateral later becomes unstable, whose oracle
+          behaves unexpectedly, or whose liquidity deteriorates.
+        </p>
+
+        <p>
+          The protocol itself may continue functioning exactly as designed, yet
+          depositors may still experience losses because the
+          <strong>
+            judgment applied around the protocol proved inadequate for the conditions
+            that emerged.
+          </strong>
+        </p>
+
+        <p>
+          That distinction matters.
+        </p>
+
+        <p>
+          Smart contracts determine what actions are possible and enforce the rules
+          of the market. A curated vault, however, adds another layer: human or
+          organizational judgment about which markets are acceptable, how much
+          capital should be allocated to them, and when exposure should be reduced.
+        </p>
+
+        <p>
+          So the next question I want to investigate is:
+        </p>
+
+        <p><strong>
+            When risk materializes inside a Morpho curated vault, where does the loss ultimately land, and what mechanisms, if any, exist to protect the depositor?
+        </strong></p>
+
+      </div>
+
+    </article>
+
+  </main>
+
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>© 2026 P</p>
+    </div>
+  </footer>
+
+</body>
+
+</html>
